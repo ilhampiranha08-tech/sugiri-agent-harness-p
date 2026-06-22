@@ -32,7 +32,7 @@ Every API call has a cost — Sugiri tells you exactly how much. With **`/cost`*
 |----|-----------|------|
 | 🐧 Linux | [install.sh](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/code_agent_sugiri/install.sh) | Internet |
 | 🪟 Windows | [install.bat](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/code_agent_sugiri/install.bat) | Internet |
-| 🪟 Windows, 🐧 Linux & 🍎 macOS | [install.py](./install/install.py) | Python + Internet |
+| 🪟 Windows, 🐧 Linux & 🍎 macOS | [install.py](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/code_agent_sugiri/install.py) | Python + Internet |
 
 ---
 
