@@ -1,0 +1,13 @@
+{
+  "name": "sugiri",
+  "version": "1.2.2",
+  "description": "Sugiri — AI Coding Agent, created by Ilham Sugiri",
+  "author": "Ilham Sugiri",
+  "keywords": ["agent", "coding-agent", "ai", "cli", "pi-package"],
+  "pi": {
+    "extensions": ["./examples/extensions"],
+    "skills": ["./examples/skills"],
+    "prompts": ["./examples/prompts"],
+    "themes": ["./examples/themes"]
+  }
+}

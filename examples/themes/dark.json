@@ -1,0 +1,25 @@
+{
+  "name": "dark",
+  "colors": {
+    "background": "#1a1b26",
+    "foreground": "#c0caf5",
+    "primary": "#7aa2f7",
+    "secondary": "#bb9af7",
+    "success": "#9ece6a",
+    "warning": "#e0af68",
+    "error": "#f7768e",
+    "dim": "#565f89",
+    "border": "#3b4261",
+    "highlight": "#2f334d"
+  },
+  "styles": {
+    "heading": "bold #7aa2f7",
+    "code": "#73daca",
+    "link": "#7dcfff underline",
+    "user_message": "on #1e2030",
+    "assistant_message": "",
+    "tool_call": "#565f89 italic",
+    "error": "bold #f7768e",
+    "thinking": "#565f89 italic"
+  }
+}

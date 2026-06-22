@@ -1,0 +1,25 @@
+{
+  "name": "light",
+  "colors": {
+    "background": "#ffffff",
+    "foreground": "#1a1b26",
+    "primary": "#34548a",
+    "secondary": "#5a4a78",
+    "success": "#485e30",
+    "warning": "#8f5e15",
+    "error": "#8c4351",
+    "dim": "#9699a3",
+    "border": "#d5d6db",
+    "highlight": "#e9e9ec"
+  },
+  "styles": {
+    "heading": "bold #34548a",
+    "code": "#485e30",
+    "link": "#166775 underline",
+    "user_message": "on #f0f0f0",
+    "assistant_message": "",
+    "tool_call": "#9699a3 italic",
+    "error": "bold #8c4351",
+    "thinking": "#9699a3 italic"
+  }
+}
