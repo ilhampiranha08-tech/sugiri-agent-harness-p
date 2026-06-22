@@ -30,8 +30,8 @@ Every API call has a cost — Sugiri tells you exactly how much. With **`/cost`*
 
 | OS | Installer | Need |
 |----|-----------|------|
-| 🐧 Linux | [install.sh](./install/install.sh) | Internet |
-| 🪟 Windows | [install.bat](./install/install.bat) | Internet |
+| 🐧 Linux | [install.sh](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/code_agent_sugiri/install.sh) | Internet |
+| 🪟 Windows | [install.bat](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/code_agent_sugiri/install.bat) | Internet |
 | 🪟 Windows, 🐧 Linux & 🍎 macOS | [install.py](./install/install.py) | Python + Internet |
 
 ---
@@ -43,7 +43,7 @@ Every API call has a cost — Sugiri tells you exactly how much. With **`/cost`*
 *Download the installer for your OS from the [table above](#-download), then:*
 
 **🐧 Linux (need internet):**
-1. Download [install.sh](./install/install.sh) *(klik kanan → Save link as)*
+1. Download [install.sh](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/code_agent_sugiri/install.sh)
 2. Open a terminal in your downloads folder:
    ```bash
    cd ~/Downloads
@@ -55,11 +55,11 @@ Every API call has a cost — Sugiri tells you exactly how much. With **`/cost`*
    ```
 
 **🪟 Windows (need internet):**
-1. Download [install.bat](./install/install.bat) *(klik kanan → Save link as)*
+1. Download [install.bat](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/code_agent_sugiri/install.bat)
 2. Double-click the file
 
 **🪟 Windows, 🐧 Linux & 🍎 macOS (need Python):**
-1. Download [install.py](./install/install.py) *(klik kanan → Save link as)*
+1. Download [install.py](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/code_agent_sugiri/install.py)
 2. Open a terminal in your downloads folder:
    ```bash
    cd ~/Downloads
