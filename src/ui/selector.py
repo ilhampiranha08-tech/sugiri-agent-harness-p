@@ -9,9 +9,21 @@ Provides:
 from __future__ import annotations
 
 import sys
-import termios
-import tty
 from typing import Any, Callable, Dict, List, Optional, Tuple
+
+# termios/tty hanya tersedia di Unix (Linux/macOS)
+try:
+    import termios
+    import tty
+    _HAS_TERMIOS = True
+except ImportError:
+    _HAS_TERMIOS = False
+
+# Windows: gunakan msvcrt untuk raw input
+if sys.platform == 'win32':
+    import msvcrt
+else:
+    msvcrt = None
 
 
 class TerminalSelector:
@@ -145,138 +157,141 @@ class TerminalSelector:
 
     def run(self) -> Optional[Any]:
         """Run the selector interactively. Returns selected item or None."""
-        
-        fd = sys.stdin.fileno()
-        old_settings = termios.tcgetattr(fd)
-        
-        try:
-            tty.setraw(fd)
-            self._reset()
-            self._draw()
+        self._reset()
+        self._draw()
 
-            while True:
-                ch = self._read_char()
+        while True:
+            ch = self._read_char()
 
-                if ch is None:
-                    continue
+            if ch is None:
+                continue
 
-                if ch == '\x1b':  # Escape sequence
-                    seq = self._read_escape()
+            if ch == '\x1b':  # Escape sequence
+                seq = self._read_escape()
 
-                    if seq == '':  # Plain Esc
-                        self._clear()
-                        return None
-                    elif seq.endswith('A'):  # Up arrow (any modifier: [A, [1;2A, [1;5A, OA)
-                        if self._filtered:
-                            self._selected_idx = max(0, self._selected_idx - 1)
-                    elif seq.endswith('B'):  # Down arrow (any modifier: [B, [1;2B, [1;5B, OB)
-                        if self._filtered:
-                            self._selected_idx = min(
-                                len(self._filtered) - 1,
-                                self._selected_idx + 1
-                            )
-                    elif seq in ('[5~', '[H'):  # Page Up / Home
-                        self._selected_idx = 0
-                    elif seq in ('[6~', '[F'):  # Page Down / End
-                        self._selected_idx = len(self._filtered) - 1 if self._filtered else 0
-                    elif seq.startswith('[') and not (seq[-1].isalpha() or seq[-1] == '~'):
-                        # Partial/incomplete CSI — ignore silently
-                        pass
-
-                    self._draw()
-
-                elif ch in ('\r', '\n'):  # Enter
+                if seq == '':  # Plain Esc
                     self._clear()
-                    if self._filtered:
-                        return self._items[self._filtered[self._selected_idx]]
                     return None
-
-                elif ch in ('\x7f', '\x08'):  # Backspace
-                    if self._filter_text:
-                        self._filter_text = self._filter_text[:-1]
-                        self._apply_filter()
-                        self._draw()
-
-                elif ch == '\x03':  # Ctrl+C
-                    self._clear()
-                    sys.stdout.write('\n')
-                    raise KeyboardInterrupt
-
-                elif ch == '\x0c':  # Ctrl+L (also used as shortcut)
-                    # Pass through - handled externally
-                    pass
-
-                elif not self._filter_text and ch in ('j', 'J'):  # Vim: down (only when not filtering)
-                    if self._filtered:
-                        self._selected_idx = min(len(self._filtered) - 1, self._selected_idx + 1)
-                    self._draw()
-
-                elif not self._filter_text and ch in ('k', 'K'):  # Vim: up (only when not filtering)
+                elif seq.endswith('A'):  # Up arrow
                     if self._filtered:
                         self._selected_idx = max(0, self._selected_idx - 1)
-                    self._draw()
+                elif seq.endswith('B'):  # Down arrow
+                    if self._filtered:
+                        self._selected_idx = min(
+                            len(self._filtered) - 1,
+                            self._selected_idx + 1
+                        )
+                elif seq in ('[5~', '[H'):  # Page Up / Home
+                    self._selected_idx = 0
+                elif seq in ('[6~', '[F'):  # Page Down / End
+                    self._selected_idx = len(self._filtered) - 1 if self._filtered else 0
+                elif seq.startswith('[') and not (seq[-1].isalpha() or seq[-1] == '~'):
+                    pass  # Partial CSI - ignore
 
-                elif not self._filter_text and ch in ('q', 'Q'):  # Quit (only when not filtering)
-                    self._clear()
-                    return None
+                self._draw()
 
-                elif ch.isprintable():
-                    self._filter_text += ch
+            elif ch in ('\r', '\n'):  # Enter
+                self._clear()
+                if self._filtered:
+                    return self._items[self._filtered[self._selected_idx]]
+                return None
+
+            elif ch in ('\x7f', '\x08'):  # Backspace
+                if self._filter_text:
+                    self._filter_text = self._filter_text[:-1]
                     self._apply_filter()
                     self._draw()
 
-        finally:
-            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+            elif ch == '\x03':  # Ctrl+C
+                self._clear()
+                sys.stdout.write('\n')
+                raise KeyboardInterrupt
+
+            elif not self._filter_text and ch in ('j', 'J'):  # Vim: down
+                if self._filtered:
+                    self._selected_idx = min(len(self._filtered) - 1, self._selected_idx + 1)
+                self._draw()
+
+            elif not self._filter_text and ch in ('k', 'K'):  # Vim: up
+                if self._filtered:
+                    self._selected_idx = max(0, self._selected_idx - 1)
+                self._draw()
+
+            elif not self._filter_text and ch in ('q', 'Q'):  # Quit
+                self._clear()
+                return None
+
+            elif ch.isprintable():
+                self._filter_text += ch
+                self._apply_filter()
+                self._draw()
 
     def _read_char(self) -> Optional[str]:
-        """Read a single character from stdin."""
+        """Read a single character from stdin. Cross-platform."""
         try:
-            ch = sys.stdin.read(1)
-            return ch if ch else None
+            if msvcrt is not None:  # Windows
+                ch = msvcrt.getwch()
+                if ch == '\x00' or ch == '\xe0':  # Extended key prefix
+                    return None  # Handled via escape sequence
+                return ch
+            else:
+                ch = sys.stdin.read(1)
+                return ch if ch else None
         except Exception:
             return None
 
     def _read_escape(self) -> str:
-        """Read escape sequence. Returns '' for plain Esc.
-        
-        Uses non-blocking I/O to atomically read the complete CSI/SS3
-        sequence that terminals send as a burst of bytes.
-        Falls back to sequential reads on platforms without fcntl (Windows).
-        """
+        """Read escape sequence. Returns '' for plain Esc."""
+        # Try to read follow-up bytes with short timeout
         import os as _os
-        fd = sys.stdin.fileno()
         
-        # Try non-blocking I/O for atomic reads (Linux/macOS)
+        if msvcrt is not None:  # Windows
+            import msvcrt as _msvcrt
+            result = ''
+            # On Windows, arrow keys send sequences like \xe0H, \xe0P, etc.
+            # In modern terminals, standard ANSI sequences are used.
+            # Read available bytes without blocking
+            while _msvcrt.kbhit():
+                try:
+                    ch = _msvcrt.getwch()
+                    result += ch
+                    if len(result) > 0 and result[-1].isalpha() or result[-1] == '~':
+                        break
+                    if len(result) >= 10:
+                        break
+                except Exception:
+                    break
+            # Normalize: if result starts with [ or O, return as-is
+            if result and result[0] in ('[', 'O'):
+                return result
+            return ''
+        
+        # Unix: non-blocking I/O
+        fd = sys.stdin.fileno()
         old_flags = None
         try:
             import fcntl
             old_flags = fcntl.fcntl(fd, fcntl.F_GETFL)
             fcntl.fcntl(fd, fcntl.F_SETFL, old_flags | _os.O_NONBLOCK)
         except (ImportError, OSError, AttributeError):
-            pass  # Windows or restricted env: fall back to sequential reads
+            pass
         
-        result = ""
+        result = ''
         try:
-            # Read as many bytes as available (escape sequences arrive atomically)
-            for _ in range(12):  # Max 12 bytes for complex sequences
+            for _ in range(12):
                 try:
                     ch = sys.stdin.read(1)
                     if not ch:
                         break
                     result += ch
-                    
-                    # CSI/SS3 sequences: start with [ or O, end with alpha or ~
                     if result and result[0] in ('[', 'O'):
-                        # Skip first char (the CSI initiator itself may be alpha like 'O')
                         if len(result) > 1 and (ch.isalpha() or ch == '~'):
                             break
                     else:
-                        # Not a CSI/SS3 initiator - just one char follow-up
                         break
                 except (BlockingIOError, TypeError, OSError):
                     break
         finally:
-            # Restore blocking mode
             if old_flags is not None:
                 try:
                     import fcntl
@@ -284,14 +299,10 @@ class TerminalSelector:
                 except Exception:
                     pass
         
-        # If we only got the Esc initiator but no follow-up, it's plain Esc
         if not result:
-            return ""
-        
-        # If first char is not [ or O, treat as plain Esc (standalone like Esc+letter)
+            return ''
         if result[0] not in ('[', 'O'):
-            return ""
-        
+            return ''
         return result
 
     def _draw(self):

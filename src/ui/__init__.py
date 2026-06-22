@@ -56,19 +56,55 @@ class AgentTUI:
         self._history: List[str] = []
         self._history_cursor: int = -1
         self._history_saved_line: str = ""
+        self._old_termios = None  # Unix only
         # Command suggestions state
         self._suggestions_visible = False
         self._suggestions_lines = 0
-        self._suggestion_selected = 0  # Index of highlighted suggestion
-        self._suggestion_matches: List[tuple] = []  # Current matching commands
-        self._suggestion_navigated = False  # True if user navigated with arrows
-        self._cached_commands: Optional[List[tuple]] = None  # Cached command list (built lazily)
+        self._suggestion_selected = 0
+        self._suggestion_matches: List[tuple] = []
+        self._suggestion_navigated = False
+        self._cached_commands: Optional[List[tuple]] = None
         # Loading state
         self._loading = False
         self._spinner_task = None
         self._spinner_chars = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
         self._spinner_idx = 0
-        self._spinner_clear_on_exit = True  # Flaga: spinner clears line on exit unless already cleared
+        self._spinner_clear_on_exit = True
+    
+    # ── Cross-platform raw input helpers ──────────────────────────
+    
+    @staticmethod
+    def _getch() -> str:
+        """Read a single character from stdin. Cross-platform."""
+        if sys.platform == 'win32':
+            import msvcrt
+            return msvcrt.getwch()
+        else:
+            return sys.stdin.read(1)
+    
+    def _enable_raw_mode(self) -> None:
+        """Enable raw terminal mode for character-by-character input."""
+        if sys.platform != 'win32':
+            import termios, tty
+            self._old_termios = termios.tcgetattr(sys.stdin.fileno())
+            tty.setraw(sys.stdin.fileno())
+    
+    def _disable_raw_mode(self) -> None:
+        """Restore terminal settings."""
+        if sys.platform != 'win32' and self._old_termios is not None:
+            import termios
+            termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, self._old_termios)
+            self._old_termios = None
+    
+    @staticmethod
+    def _kbhit() -> bool:
+        """Check if a keypress is available. Cross-platform."""
+        if sys.platform == 'win32':
+            import msvcrt
+            return msvcrt.kbhit()
+        else:
+            import select
+            return select.select([sys.stdin], [], [], 0)[0] != []
     
     async def _spinner_loop(self):
         """Animate a loading spinner while agent is working."""
@@ -152,7 +188,7 @@ class AgentTUI:
     async def _permission_prompt(self, tool_name: str, params: dict) -> str:
         """Show permission confirmation with arrow-selectable options.
         Returns True (allow), False (deny), or 'allow_all'."""
-        import sys, termios, tty
+        import sys
         
         # Build short description
         cmd = params.get("command", params.get("path", ""))
@@ -173,9 +209,8 @@ class AgentTUI:
         def draw():
             nonlocal _drawn
             if _drawn:
-                # Move up to top of previous prompt area
                 sys.stdout.write(f'\033[{_lines}A')
-            sys.stdout.write('\r\033[J')  # Clear from here to end of screen
+            sys.stdout.write('\r\033[J')
             sys.stdout.write(f'  \033[33m⚠\033[0m  \033[33m{desc}\033[0m\n\n')
             for i, (key, label) in enumerate(options):
                 if i == selected:
@@ -186,23 +221,23 @@ class AgentTUI:
             sys.stdout.flush()
             _drawn = True
         
-        fd = sys.stdin.fileno()
-        old = termios.tcgetattr(fd)
+        self._enable_raw_mode()
         try:
-            tty.setraw(fd)
             draw()
             
             while True:
-                ch = sys.stdin.read(1)
+                ch = self._getch()
                 
                 if ch == '\x1b':
                     # Read full escape sequence
                     seq = ch
                     for _ in range(6):
-                        c = sys.stdin.read(1)
-                        if not c: break
+                        if not self._kbhit():
+                            break
+                        c = self._getch()
                         seq += c
-                        if c.isalpha() or c == '~': break
+                        if c.isalpha() or c == '~':
+                            break
                     
                     if seq in ('\x1b[A', '\x1bOA'):  # Up
                         selected = (selected - 1) % len(options)
@@ -231,7 +266,7 @@ class AgentTUI:
                 elif ch == '\x03':  # Ctrl+C
                     return False
         finally:
-            termios.tcsetattr(fd, termios.TCSADRAIN, old)
+            self._disable_raw_mode()
     
     async def run(self, initial_message: Optional[str] = None) -> None:
         """Run the interactive TUI."""
@@ -628,20 +663,14 @@ class AgentTUI:
         - Ctrl+L model selector
         """
         import sys
-        import termios
-        import tty
-        import select
         import os
         
-        fd = sys.stdin.fileno()
-        old_settings = termios.tcgetattr(fd)
         buffer = ""
         lines: List[str] = []
         cursor_pos = 0
         in_paste = False
         paste_buffer = ""
         
-        # Save history position for restoration
         # Clear any leftover suggestion artifacts
         self._suggestions_visible = False
         self._suggestions_lines = 0
@@ -714,7 +743,7 @@ class AgentTUI:
             cursor_pos += len(text)
         
         try:
-            tty.setraw(fd)
+            self._enable_raw_mode()
             
             while self._running:
                 # Redraw input line
@@ -723,7 +752,7 @@ class AgentTUI:
                 self._render_suggestions(buffer)
                 
                 # Read next character
-                ch = await asyncio.get_event_loop().run_in_executor(None, sys.stdin.read, 1)
+                ch = await asyncio.get_event_loop().run_in_executor(None, self._getch)
                 
                 if not ch:
                     self._running = False
@@ -733,11 +762,10 @@ class AgentTUI:
                 if in_paste:
                     if ch == '\x1b':
                         # Might be paste end marker \e[201~
-                        ready, _, _ = select.select([fd], [], [], 0.05)
-                        if ready:
+                        if self._kbhit():
                             seq = ch
                             while True:
-                                c = sys.stdin.read(1)
+                                c = self._getch()
                                 if not c:
                                     break
                                 seq += c
@@ -836,46 +864,24 @@ class AgentTUI:
                 
                 # ── Escape sequences ────────────────────────────────
                 elif ch == '\x1b':
-                    # Try to read the rest of the escape sequence (atomically if possible)
+                    # Read the rest of the escape sequence
                     seq = ch
                     try:
-                        import fcntl
-                        old_flags = fcntl.fcntl(fd, fcntl.F_GETFL)
-                        fcntl.fcntl(fd, fcntl.F_SETFL, old_flags | os.O_NONBLOCK)
-                        try:
-                            # Read up to 12 more bytes (max CSI sequence length)
-                            for _ in range(12):
-                                try:
-                                    c = sys.stdin.read(1)
-                                    if not c:
-                                        break
-                                    seq += c
-                                    if c.isalpha() or c == '~':
-                                        break
-                                except (BlockingIOError, TypeError, OSError):
+                        # Read up to 12 more bytes (max CSI sequence length)
+                        for _ in range(12):
+                            if not self._kbhit():
+                                break
+                            try:
+                                c = self._getch()
+                                if not c:
                                     break
-                        finally:
-                            fcntl.fcntl(fd, fcntl.F_SETFL, old_flags)
-                    except (ImportError, OSError, AttributeError):
-                        # Fallback: read one more byte (works for most sequences)
-                        import select as _sel
-                        ready, _, _ = _sel.select([fd], [], [], 0.05)
-                        if ready:
-                            c = sys.stdin.read(1)
-                            if c:
                                 seq += c
-                                if c == '[' or c == 'O':
-                                    # Read until alpha or ~
-                                    while True:
-                                        r, _, _ = _sel.select([fd], [], [], 0.02)
-                                        if not r:
-                                            break
-                                        c2 = sys.stdin.read(1)
-                                        if not c2:
-                                            break
-                                        seq += c2
-                                        if c2.isalpha() or c2 == '~':
-                                            break
+                                if c.isalpha() or c == '~':
+                                    break
+                            except Exception:
+                                break
+                    except Exception:
+                        pass
                     if len(seq) == 1:
                         # Plain Esc - no follow-up bytes
                         if self._session.is_streaming:
@@ -969,11 +975,11 @@ class AgentTUI:
                     models = sorted(models, key=lambda m: (m.provider, m.model_id))
                     
                     loop = asyncio.get_event_loop()
-                    termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+                    self._disable_raw_mode()
                     
                     chosen = await loop.run_in_executor(None, select_model, models)
                     
-                    tty.setraw(fd)
+                    self._enable_raw_mode()
                     
                     if chosen:
                         await self._session.set_model(chosen)
@@ -1019,13 +1025,13 @@ class AgentTUI:
                 # ── @ file picker ────────────────────────────────────
                 elif ch == '@':
                     import os as _os
-                    termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+                    self._disable_raw_mode()
 
                     from .selector import select_file
                     loop = asyncio.get_event_loop()
                     chosen = await loop.run_in_executor(None, select_file, _os.getcwd())
 
-                    tty.setraw(fd)
+                    self._enable_raw_mode()
 
                     if chosen:
                         insert_text(chosen)
@@ -1040,7 +1046,7 @@ class AgentTUI:
                         self._suggestion_navigated = False  # Reset on new input
         
         finally:
-            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+            self._disable_raw_mode()
         
         return ""
     
