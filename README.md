@@ -20,7 +20,7 @@ Every API call has a cost — Sugiri tells you exactly how much. With **`/cost`*
 
 - [Website](#) *(coming soon)*
 - [Documentation](#) *(coming soon)*
-- [Discord](#) *(coming soon)*
+
 
 ## 🖼️ Screenshot
 
