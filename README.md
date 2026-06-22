@@ -59,9 +59,15 @@ Every API call has a cost — Sugiri tells you exactly how much. With **`/cost`*
 2. Double-click the file
 
 **🪟 Windows, 🐧 Linux & 🍎 macOS (need Python):**
-```bash
-python3 install.py
-```
+1. Download [install.py](./install/install.py)
+2. Open a terminal in your downloads folder:
+   ```bash
+   cd ~/Downloads
+   ```
+3. Run the installer:
+   ```bash
+   python3 install.py
+   ```
 
 The installer auto-detects your OS, installs Python if missing, and sets up Sugiri.
 Then just open a terminal and type `sugiri`.
