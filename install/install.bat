@@ -245,41 +245,57 @@ echo       Installing from: !PROJECT_DIR!
 "%PYTHON_EXE%" -m pip install -e . --no-deps --quiet 2>&1
 
 REM Verifikasi sugiri bisa jalan
-where sugiri >nul 2>&1
-if %errorlevel% equ 0 (
-    echo [OK] sugiri command ready!
-) else (
-    REM Cek di folder Scripts Python
-    if exist "!PYTHON_DIR!\Scripts\sugiri.exe" (
-        echo [WARN] Folder Scripts Python tidak ada di PATH.
-        echo.
-        echo   Tambahkan ini ke PATH:
-        echo   !PYTHON_DIR!\Scripts
-        echo.
-        echo   Atau jalankan dengan full path:
-        echo   !PYTHON_DIR!\Scripts\sugiri.exe
-        echo.
-        echo   Cara tambah PATH (Windows 10/11^):
-        echo   1. Win+R -^> ketik: systempropertiesadvanced
-        echo   2. Environment Variables
-        echo   3. Pilih "Path" -^> Edit -^> New
-        echo   4. Paste: !PYTHON_DIR!\Scripts
-        echo   5. OK, lalu buka terminal BARU
-    ) else (
-        echo [WARN] sugiri.exe tidak ditemukan. Coba:
-        echo       "%PYTHON_EXE%" -m sugiri
+echo.
+echo [INFO] Menambahkan Sugiri ke PATH...
+
+REM 1. Tambah permanen ke User PATH (untuk terminal BARU)
+for /f "skip=2 tokens=3*" %%a in ('reg query HKCU\Environment /v PATH 2^>nul') do set "OLD_PATH=%%b"
+if defined OLD_PATH (
+    echo !OLD_PATH! | findstr /c:"!PYTHON_DIR!" >nul
+    if !errorlevel! neq 0 (
+        setx PATH "!PYTHON_DIR!\Scripts;!OLD_PATH!" >nul 2>&1
     )
+) else (
+    setx PATH "!PYTHON_DIR!\Scripts" >nul 2>&1
 )
 
-echo.
+REM 2. Tambah ke PATH sesi INI (installer bisa langsung panggil sugiri)
+set "PATH=!PYTHON_DIR!\Scripts;%PATH%"
+
+REM 3. Tambah ke VS Code settings.json (biar terminal baru langsung bisa)
+echo [INFO] Configure VS Code integrated terminal...
+set "VSCODE_SETTINGS=%APPDATA%\Code\User\settings.json"
+if exist "!VSCODE_SETTINGS!" (
+    "%PYTHON_EXE%" -c "import json, sys, os; p=os.environ['PYTHON_DIR']+'\\\\Scripts'; f=os.environ['VSCODE_SETTINGS']; d=json.load(open(f)) if os.path.exists(f) and os.path.getsize(f)>0 else {}; d.setdefault('terminal.integrated.env.windows',{})['PATH']=p+';${env:PATH}'; json.dump(d, open(f,'w'), indent=4); print('VS Code configured OK')" 2>nul
+    if !errorlevel! equ 0 ( echo [OK] VS Code: buka terminal baru ^(Ctrl+^`^) langsung bisa sugiri )
+)
+
 echo ========================================
-echo   INSTALL COMPLETE
+echo   INSTALL COMPLETE!
 echo ========================================
 echo.
-echo   Jalankan: sugiri
-echo   Tips: /login  /model  /help
+echo   Sugiri v1.2.2 sudah siap!
+echo.
+echo   CARA MENJALANKAN:
+echo.
+echo   1. Buka terminal BARU (cmd / PowerShell)
+echo      Ketik: sugiri
+echo.
+echo   2. VS Code: Ctrl+^` (terminal baru) langsung bisa sugiri
+echo.
+echo   3. Terminal SEKARANG (copy-paste 1 baris):
+echo      set PATH=!PYTHON_DIR!\Scripts;%%PATH%%
+echo      sugiri
+echo.
 echo   Author: Ilham Sugiri
 echo.
+
+REM Tawarkan langsung jalankan
+echo   ----------------------------------------
+set /p RUNNOW="  Jalankan Sugiri sekarang? [Y/n]: "
+if /i "!RUNNOW!"=="" set RUNNOW=Y
+if /i "!RUNNOW!"=="Y" ( echo. && sugiri )
+if /i "!RUNNOW!"=="y" ( echo. && sugiri )
 pause
 exit /b 0
 
