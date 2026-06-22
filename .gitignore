@@ -42,3 +42,4 @@ Desktop.ini
 .coverage
 htmlcov/
 .tox/
+nul
