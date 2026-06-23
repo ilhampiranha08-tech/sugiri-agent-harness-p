@@ -43,7 +43,7 @@ Every API call has a cost — Sugiri tells you exactly how much. With **`/cost`*
 
 Just copy-paste one line into your terminal:
 
-**🐧 Linux / 🍎 macOS:**
+**🐧 Linux:**
 ```bash
 curl -fsSL https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.3.sh | bash
 ```
@@ -58,7 +58,7 @@ irm https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/downl
 curl -fsSL https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.3.bat -o %TEMP%\sgr.bat && %TEMP%\sgr.bat
 ```
 
-**🐍 Cross-platform (Python 3.10+):**
+**🐍 Cross-platform 🐧 Linux / 🍎 macOS / 🪟 Windows (need Python 3.10+):**
 ```bash
 curl -fsSL https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.3.py | python3
 ```
