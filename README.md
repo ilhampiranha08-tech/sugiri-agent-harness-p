@@ -39,11 +39,33 @@ Every API call has a cost — Sugiri tells you exactly how much. With **`/cost`*
 
 ## Quick Start
 
-### Option 1: One-Click Installer (Recommended)
+### Option 1: One-Line Installer (Recommended)
+
+Just copy-paste one line into your terminal:
+
+**🐧 Linux / 🍎 macOS:**
+```bash
+curl -fsSL https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.3.sh | bash
+```
+
+**🪟 Windows (PowerShell):**
+```powershell
+irm https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.3.bat -OutFile $env:TEMP\sgr.bat; & $env:TEMP\sgr.bat
+```
+
+**🐍 Cross-platform (Python 3.10+):**
+```bash
+curl -fsSL https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.3.py | python3
+```
+
+The installer auto-detects your OS, installs Python if missing, and sets up Sugiri.
+Then just open a terminal and type `sugiri`.
+
+### Option 2: One-Click Installer
 
 *Download the installer for your OS from the [table above](#-download), then:*
 
-**🐧 Linux (need internet):**
+**🐧 Linux:**
 1. Download [install-sgr-1.2.3.sh](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.3.sh)
 2. Open a terminal in your downloads folder:
    ```bash
@@ -55,11 +77,11 @@ Every API call has a cost — Sugiri tells you exactly how much. With **`/cost`*
    ./install-sgr-1.2.3.sh
    ```
 
-**🪟 Windows (need internet):**
+**🪟 Windows:**
 1. Download [install-sgr-1.2.3.bat](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.3.bat)
 2. Double-click the file
 
-**🪟 Windows, 🐧 Linux & 🍎 macOS (need Python):**
+**🐍 Cross-platform (Python):**
 1. Download [install-sgr-1.2.3.py](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.3.py)
 2. Open a terminal in your downloads folder:
    ```bash
@@ -70,10 +92,7 @@ Every API call has a cost — Sugiri tells you exactly how much. With **`/cost`*
    python3 install-sgr-1.2.3.py
    ```
 
-The installer auto-detects your OS, installs Python if missing, and sets up Sugiri.
-Then just open a terminal and type `sugiri`.
-
-### Option 2: Manual (pip)
+### Option 3: Manual (pip)
 
 ```bash
 # 1. Download the project
