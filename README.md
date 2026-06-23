@@ -31,9 +31,9 @@ Every API call has a cost — Sugiri tells you exactly how much. With **`/cost`*
 
 | OS | Installer | Need |
 |----|-----------|------|
-| 🐧 Linux | [install-sgr-1.2.4.sh](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.4.sh) | Internet |
-| 🪟 Windows | [install-sgr-1.2.4.bat](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.4.bat) | Internet |
-| 🪟 Windows, 🐧 Linux & 🍎 macOS | [install-sgr-1.2.4.py](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.4.py) | Python + Internet |
+| 🐧 Linux | [install-sgr-1.2.4.sh](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/linux_code_agent/install-sgr-1.2.4.sh) | Internet |
+| 🪟 Windows | [install-sgr-1.2.4.bat](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/linux_code_agent/install-sgr-1.2.4.bat) | Internet |
+| 🪟 Windows, 🐧 Linux & 🍎 macOS | [install-sgr-1.2.4.py](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/linux_code_agent/install-sgr-1.2.4.py) | Python + Internet |
 
 ---
 
@@ -45,22 +45,22 @@ Just copy-paste one line into your terminal:
 
 **🐧 Linux:**
 ```bash
-curl -fsSL https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.4.sh -o /tmp/sgr.sh && bash /tmp/sgr.sh
+curl -fsSL https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/linux_code_agent/install-sgr-1.2.4.sh -o /tmp/sgr.sh && bash /tmp/sgr.sh
 ```
 
 **🪟 Windows (PowerShell):**
 ```powershell
-irm https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.4.bat -OutFile $env:TEMP\sgr.bat; & $env:TEMP\sgr.bat
+irm https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/linux_code_agent/install-sgr-1.2.4.bat -OutFile $env:TEMP\sgr.bat; & $env:TEMP\sgr.bat
 ```
 
 **🪟 Windows (CMD):**
 ```cmd
-curl -fsSL https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.4.bat -o %TEMP%\sgr.bat && %TEMP%\sgr.bat
+curl -fsSL https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/linux_code_agent/install-sgr-1.2.4.bat -o %TEMP%\sgr.bat && %TEMP%\sgr.bat
 ```
 
 **🐍 Cross-platform 🐧 Linux / 🍎 macOS / 🪟 Windows (need Python 3.10+):**
 ```bash
-curl -fsSL https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.4.py | python3
+curl -fsSL https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/linux_code_agent/install-sgr-1.2.4.py | python3
 ```
 
 The installer auto-detects your OS, installs Python if missing, and sets up Sugiri.
@@ -71,7 +71,7 @@ Then just open a terminal and type `sugiri`.
 *Download the installer for your OS from the [table above](#-download), then:*
 
 **🐧 Linux:**
-1. Download [install-sgr-1.2.4.sh](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.4.sh)
+1. Download [install-sgr-1.2.4.sh](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/linux_code_agent/install-sgr-1.2.4.sh)
 2. Open a terminal in your downloads folder:
    ```bash
    cd ~/Downloads
@@ -83,11 +83,11 @@ Then just open a terminal and type `sugiri`.
    ```
 
 **🪟 Windows:**
-1. Download [install-sgr-1.2.4.bat](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.4.bat)
+1. Download [install-sgr-1.2.4.bat](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/linux_code_agent/install-sgr-1.2.4.bat)
 2. Double-click the file
 
 **🐍 Cross-platform (Python):**
-1. Download [install-sgr-1.2.4.py](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.4.py)
+1. Download [install-sgr-1.2.4.py](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/linux_code_agent/install-sgr-1.2.4.py)
 2. Open a terminal in your downloads folder:
    ```bash
    cd ~/Downloads
