@@ -12,7 +12,7 @@ set -e
 # Self-extracting archive needs $0 to be a real file path
 if [ ! -f "$0" ] || [ ! -r "$0" ]; then
     echo "ERROR: This installer cannot run via pipe (curl ... | bash)."
-    echo "Please use: curl -fsSL <url> -o /tmp/sgr.sh && bash /tmp/sgr.sh"
+    echo "Please use: curl -fsSL <url> -o ~/sgr.sh && bash ~/sgr.sh"
     exit 1
 fi
 # Detect Alpine Linux (Acode editor on Android)

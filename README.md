@@ -45,7 +45,7 @@ Just copy-paste one line into your terminal:
 
 **🐧 Linux:**
 ```bash
-curl -fsSL https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/linux_code_agent/install-sgr-1.2.4.sh -o /tmp/sgr.sh && bash /tmp/sgr.sh
+curl -fsSL https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/linux_code_agent/install-sgr-1.2.4.sh -o ~/sgr.sh && bash ~/sgr.sh
 ```
 
 **🪟 Windows (PowerShell):**
