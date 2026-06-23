@@ -53,6 +53,11 @@ curl -fsSL https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/release
 irm https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.3.bat -OutFile $env:TEMP\sgr.bat; & $env:TEMP\sgr.bat
 ```
 
+**🪟 Windows (CMD):**
+```cmd
+curl -fsSL https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.3.bat -o %TEMP%\sgr.bat && %TEMP%\sgr.bat
+```
+
 **🐍 Cross-platform (Python 3.10+):**
 ```bash
 curl -fsSL https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.3.py | python3
