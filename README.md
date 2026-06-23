@@ -119,6 +119,18 @@ export DEEPSEEK_API_KEY="sk-xxxxx"
 sugiri
 ```
 
+### Uninstall
+
+Sugiri hanya menyimpan file di dua folder user — tidak ada registry, tidak ada system service.
+
+| OS | Command |
+|----|---------|
+| 🐧 **Linux** | `pip uninstall sugiri -y`<br>`rm -rf ~/.sugiri ~/.agent` |
+| 🍎 **macOS** | `pip uninstall sugiri -y`<br>`rm -rf ~/.sugiri ~/.agent` |
+| 🪟 **Windows** | `pip uninstall sugiri -y`<br>`rmdir /s /q %USERPROFILE%\.sugiri`<br>`rmdir /s /q %USERPROFILE%\.agent` |
+
+> ⚠️ Folder `~/.agent` berisi API key (`auth.json`) dan session history. Hapus hanya jika sudah tidak dibutuhkan.
+
 ## Why Sugiri?
 
 | | |
