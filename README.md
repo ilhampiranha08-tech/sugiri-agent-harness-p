@@ -121,7 +121,7 @@ sugiri
 
 ### Uninstall
 
-Sugiri hanya menyimpan file di dua folder user — tidak ada registry, tidak ada system service.
+Sugiri only stores files in two user folders — no registry, no system service, no leftovers.
 
 | OS | Command |
 |----|---------|
@@ -129,7 +129,7 @@ Sugiri hanya menyimpan file di dua folder user — tidak ada registry, tidak ada
 | 🍎 **macOS** | `pip uninstall sugiri -y`<br>`rm -rf ~/.sugiri ~/.agent` |
 | 🪟 **Windows** | `pip uninstall sugiri -y`<br>`rmdir /s /q %USERPROFILE%\.sugiri`<br>`rmdir /s /q %USERPROFILE%\.agent` |
 
-> ⚠️ Folder `~/.agent` berisi API key (`auth.json`) dan session history. Hapus hanya jika sudah tidak dibutuhkan.
+> ⚠️ The `~/.agent` folder contains your API keys (`auth.json`) and session history. Only delete if no longer needed.
 
 ## Why Sugiri?
 
