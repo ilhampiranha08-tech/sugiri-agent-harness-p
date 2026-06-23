@@ -2,13 +2,17 @@
 setlocal enabledelayedexpansion
 REM ==============================================
 REM  Sugiri - "The AI agent that remembers"
-REM  Built in Indonesia, works everywhere. v1.2.2
+REM  Built in Indonesia, works everywhere. v1.2.3
 REM  Windows Standalone Installer - Double-click
+REM  Fix: spinner race, token tracking, cursor wrap, session reset,
+REM       Google tool result, remember persist, export overwrite warn,
+REM       token count fallback, settings lock, edit warnings, timeout
 REM ==============================================
 
 echo ========================================
-echo   Sugiri - "The AI agent that remembers"
+echo   Sugiri - "The AI agent that remembers"  v1.2.3
 echo   Built in Indonesia, works everywhere.
+echo   Fix: spinner flicker + input redundancy
 echo ========================================
 echo.
 
@@ -76,21 +80,21 @@ REM Method 1: winget
 where winget >nul 2>&1
 if %errorlevel% equ 0 (
     echo       Downloading Python 3.12 via winget...
-    echo       (ini akan otomatis, tunggu sebentar)
+    echo       (this will run automatically, please wait)
     winget install Python.Python.3.12 --accept-package-agreements --accept-source-agreements --silent
     if !errorlevel! equ 0 (
         echo [OK] Python installed!
         echo.
-        echo   Silakan CLOSE / TUTUP terminal ini, lalu buka terminal BARU.
-        echo   Setelah itu, jalankan ulang installer ini (klik 2x install.bat).
+        echo   Please CLOSE this terminal, then open a NEW terminal.
+        echo   After that, re-run this installer (double-click install.bat).
         echo.
         pause
         exit /b 0
     )
-    echo [WARN] winget gagal, coba cara lain...
+    echo [WARN] winget failed, trying another method...
 )
 
-REM Method 2: Download Python installer langsung
+REM Method 2: Download Python installer directly
 echo [...] Downloading Python installer...
 set "PYTHON_INSTALLER=%TEMP%\python-3.12.0-amd64.exe"
 curl -L -o "%PYTHON_INSTALLER%" "https://www.python.org/ftp/python/3.12.0/python-3.12.0-amd64.exe" 2>nul
@@ -101,8 +105,8 @@ if exist "%PYTHON_INSTALLER%" (
         del "%PYTHON_INSTALLER%" 2>nul
         echo [OK] Python installed!
         echo.
-        echo   Silakan CLOSE / TUTUP terminal ini, lalu buka terminal BARU.
-        echo   Setelah itu, jalankan ulang installer ini (klik 2x install.bat).
+        echo   Please CLOSE this terminal, then open a NEW terminal.
+        echo   After that, re-run this installer (double-click install.bat).
         echo.
         pause
         exit /b 0
@@ -112,11 +116,11 @@ if exist "%PYTHON_INSTALLER%" (
 
 REM Method 3: Show manual instructions
 echo.
-echo [INFO] Auto-install gagal. Silakan install Python manual:
+echo [INFO] Auto-install failed. Please install Python manually:
 echo.
 echo   1. Download Python: https://python.org
-echo   2. Saat install, CENTANG "Add Python to PATH"!
-echo   3. Install, lalu jalankan ulang installer ini
+echo   2. During install, CHECK "Add Python to PATH"!
+echo   3. Install, then re-run this installer
 echo.
 pause
 exit /b 1
@@ -128,7 +132,7 @@ if %errorlevel% neq 0 (
     echo [...] Installing pip...
     "%PYTHON_EXE%" -m ensurepip --upgrade 2>nul
     if !errorlevel! neq 0 (
-        echo [WARN] pip install gagal, coba download get-pip.py...
+        echo [WARN] pip install failed, trying to download get-pip.py...
         curl -sSL "https://bootstrap.pypa.io/get-pip.py" -o "%TEMP%\get-pip.py" 2>nul
         if exist "%TEMP%\get-pip.py" (
             "%PYTHON_EXE%" "%TEMP%\get-pip.py" 2>nul
@@ -140,15 +144,15 @@ if %errorlevel% neq 0 (
 if %errorlevel% equ 0 (
     echo [OK] pip ready
 ) else (
-    echo [WARN] pip tidak tersedia. Install manual: "%PYTHON_EXE%" -m pip install -e .
+    echo [WARN] pip not available. Install manually: "%PYTHON_EXE%" -m pip install -e .
 )
 echo.
 
-REM ---- Extract embedded archive (Python baca langsung dari bat file) ----
+REM ---- Extract embedded archive (Python reads directly from this bat file) ----
 echo [...] Extracting Sugiri...
 set "INSTALL_DIR=%USERPROFILE%\.sugiri"
 
-REM Write Python script: baca bat file, cari marker, decode base64, extract tar
+REM Write Python script: read bat file, find marker, decode base64, extract tar
 (
 echo import base64, tarfile, io, os, sys
 echo.
@@ -164,10 +168,10 @@ echo if idx == -1:
 echo     print('ERROR: marker not found', file=sys.stderr^)
 echo     sys.exit(1^)
 echo.
-echo # Ambil semua setelah marker (skip newline setelah marker^)
+echo # Take everything after the marker (skip newline after marker^)
 echo after = content[idx + len(marker^):].lstrip('\r\n'^)
 echo.
-echo # Bersihkan: hanya karakter base64 valid
+echo # Clean: only valid base64 characters
 echo clean = ''.join(c for c in after if c.isalnum(^) or c in '+/='^)
 echo.
 echo # Decode base64
@@ -179,7 +183,7 @@ echo     sys.exit(1^)
 echo.
 echo buf = io.BytesIO(data^)
 echo.
-echo # Coba gzip dulu, fallback plain tar
+echo # Try gzip first, fallback plain tar
 echo try:
 echo     tf = tarfile.open(fileobj=buf, mode='r:gz'^)
 echo except tarfile.ReadError:
@@ -203,8 +207,8 @@ mkdir "%INSTALL_DIR%" 2>nul
 echo [...] Decoding ^& extracting archive...
 "%PYTHON_EXE%" "%TEMP%\_sugiri_install.py" "%~f0" "%INSTALL_DIR%"
 if !errorlevel! neq 0 (
-    echo [ERR] Gagal decode/extract archive.
-    echo        Coba install manual dari folder project.
+    echo [ERR] Failed to decode/extract archive.
+    echo        Try manual install from the project folder.
     del "%TEMP%\_sugiri_install.py" 2>nul
     pause
     exit /b 1
@@ -215,28 +219,28 @@ echo [OK] Files extracted
 echo [...] Installing dependencies...
 "%PYTHON_EXE%" -m pip install httpx rich click 2>&1
 if !errorlevel! neq 0 (
-    echo [WARN] Beberapa dependency gagal, lanjut saja...
+    echo [WARN] Some dependencies failed, continuing anyway...
 )
 
 echo [...] Installing Sugiri...
-REM Cari folder project (cari setup.py di dalam install dir)
+REM Find project folder (look for setup.py inside install dir)
 set "PROJECT_DIR="
 if exist "%INSTALL_DIR%\sugiri-agent-harness-p\setup.py" (
     set "PROJECT_DIR=%INSTALL_DIR%\sugiri-agent-harness-p"
 ) else if exist "%INSTALL_DIR%\sugiri-agent-harness\setup.py" (
     set "PROJECT_DIR=%INSTALL_DIR%\sugiri-agent-harness"
 ) else (
-    REM Cari rekursif folder yang mengandung setup.py
+    REM Recursively find folder containing setup.py
     for /r "%INSTALL_DIR%" %%f in (setup.py) do (
         if exist "%%f" set "PROJECT_DIR=%%~dpf"
     )
 )
 if "!PROJECT_DIR!"=="" (
-    echo [WARN] Tidak bisa menemukan setup.py di %INSTALL_DIR%
-    echo        Isi folder:
+    echo [WARN] Cannot find setup.py in %INSTALL_DIR%
+    echo        Folder contents:
     dir /b "%INSTALL_DIR%" 2>nul
     echo.
-    echo        Coba install manual dari folder project.
+    echo        Try manual install from the project folder.
     pause
     exit /b 1
 )
@@ -244,11 +248,11 @@ cd /d "!PROJECT_DIR!"
 echo       Installing from: !PROJECT_DIR!
 "%PYTHON_EXE%" -m pip install -e . --no-deps --quiet 2>&1
 
-REM Verifikasi sugiri bisa jalan
+REM Verify sugiri can run
 echo.
-echo [INFO] Menambahkan Sugiri ke PATH...
+echo [INFO] Adding Sugiri to PATH...
 
-REM 1. Tambah permanen ke User PATH (untuk terminal BARU)
+REM 1. Add permanently to User PATH (for NEW terminals)
 for /f "skip=2 tokens=3*" %%a in ('reg query HKCU\Environment /v PATH 2^>nul') do set "OLD_PATH=%%b"
 if defined OLD_PATH (
     echo !OLD_PATH! | findstr /c:"!PYTHON_DIR!" >nul
@@ -259,40 +263,40 @@ if defined OLD_PATH (
     setx PATH "!PYTHON_DIR!\Scripts" >nul 2>&1
 )
 
-REM 2. Tambah ke PATH sesi INI (installer bisa langsung panggil sugiri)
+REM 2. Add to THIS session's PATH (so installer can call sugiri directly)
 set "PATH=!PYTHON_DIR!\Scripts;%PATH%"
 
-REM 3. Tambah ke VS Code settings.json (biar terminal baru langsung bisa)
+REM 3. Add to VS Code settings.json (so new terminals work immediately)
 echo [INFO] Configure VS Code integrated terminal...
 set "VSCODE_SETTINGS=%APPDATA%\Code\User\settings.json"
 if exist "!VSCODE_SETTINGS!" (
     "%PYTHON_EXE%" -c "import json, sys, os; p=os.environ['PYTHON_DIR']+'\\\\Scripts'; f=os.environ['VSCODE_SETTINGS']; d=json.load(open(f)) if os.path.exists(f) and os.path.getsize(f)>0 else {}; d.setdefault('terminal.integrated.env.windows',{})['PATH']=p+';${env:PATH}'; json.dump(d, open(f,'w'), indent=4); print('VS Code configured OK')" 2>nul
-    if !errorlevel! equ 0 ( echo [OK] VS Code: buka terminal baru ^(Ctrl+^`^) langsung bisa sugiri )
+    if !errorlevel! equ 0 ( echo [OK] VS Code: open new terminal ^(Ctrl+^`^) and sugiri works immediately )
 )
 
 echo ========================================
 echo   INSTALL COMPLETE!
 echo ========================================
 echo.
-echo   Sugiri v1.2.2 sudah siap!
+echo   Sugiri v1.2.3 is ready!
 echo.
-echo   CARA MENJALANKAN:
+echo   HOW TO RUN:
 echo.
-echo   1. Buka terminal BARU (cmd / PowerShell)
-echo      Ketik: sugiri
+echo   1. Open a NEW terminal (cmd / PowerShell)
+echo      Type: sugiri
 echo.
-echo   2. VS Code: Ctrl+^` (terminal baru) langsung bisa sugiri
+echo   2. VS Code: Ctrl+^` (new terminal) sugiri works immediately
 echo.
-echo   3. Terminal SEKARANG (copy-paste 1 baris):
+echo   3. THIS terminal (copy-paste 1 line):
 echo      set PATH=!PYTHON_DIR!\Scripts;%%PATH%%
 echo      sugiri
 echo.
 echo   Author: Ilham Sugiri
 echo.
 
-REM Tawarkan langsung jalankan
+REM Offer to run immediately
 echo   ----------------------------------------
-set /p RUNNOW="  Jalankan Sugiri sekarang? [Y/n]: "
+set /p RUNNOW="  Run Sugiri now? [Y/n]: "
 if /i "!RUNNOW!"=="" set RUNNOW=Y
 if /i "!RUNNOW!"=="Y" ( echo. && sugiri )
 if /i "!RUNNOW!"=="y" ( echo. && sugiri )

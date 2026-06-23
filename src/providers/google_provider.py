@@ -42,7 +42,7 @@ class GoogleProvider(ProviderInterface):
 
     async def _get_client(self) -> httpx.AsyncClient:
         if self._client is None:
-            self._client = httpx.AsyncClient(timeout=httpx.Timeout(120.0))
+            self._client = httpx.AsyncClient(timeout=httpx.Timeout(300.0))  # 5 min for long-thinking models
             self._owns_client = True
         return self._client
 
@@ -106,10 +106,22 @@ class GoogleProvider(ProviderInterface):
                 contents.append({"role": "model", "parts": parts})
 
             elif msg.role == "tool":
-                # Gemini expects functionResponse in a "user" turn
+                # Gemini expects functionResponse in a "user" turn.
+                # Extract the actual text content from the tool result format
+                # (which is a JSON array like [{"type":"text","text":"..."}])
                 try:
                     parsed = json.loads(msg.content) if isinstance(msg.content, str) else msg.content
-                    response_text = json.dumps(parsed) if isinstance(parsed, (list, dict)) else str(parsed)
+                    if isinstance(parsed, list):
+                        # Extract text from structured tool result
+                        parts_list = []
+                        for item in parsed:
+                            if isinstance(item, dict) and item.get("type") == "text":
+                                parts_list.append(item.get("text", ""))
+                        response_text = "\n".join(parts_list) if parts_list else json.dumps(parsed)
+                    elif isinstance(parsed, dict):
+                        response_text = parsed.get("text", json.dumps(parsed))
+                    else:
+                        response_text = str(parsed)
                 except (json.JSONDecodeError, TypeError):
                     response_text = str(msg.content)
 

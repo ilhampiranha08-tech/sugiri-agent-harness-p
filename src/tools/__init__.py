@@ -280,9 +280,11 @@ merge them into one edit instead of emitting overlapping edits."""
             
             # Warn if oldText appears multiple times (only 1st occurrence replaced)
             count = modified.count(old_text)
+            duplicate_warnings = []
             if count > 1:
-                import warnings
-                warnings.warn(f"oldText appears {count} times in {path}. Only first occurrence replaced.")
+                duplicate_warnings.append(
+                    f"⚠️  oldText appears {count} times in {path}. Only first occurrence replaced."
+                )
             
             modified = modified.replace(old_text, new_text, 1)
         
@@ -311,13 +313,19 @@ merge them into one edit instead of emitting overlapping edits."""
         else:
             diff_text = f"{changes} change(s), +{added}/-{removed} lines (no diff)"
         
+        # Include duplicate warnings in result text
+        result_text = f"Edited {path}: {changes} change(s), +{added}/-{removed} lines"
+        if duplicate_warnings:
+            result_text += "\n" + "\n".join(duplicate_warnings)
+        result_text += f"\n\n{diff_text}"
+        
         return ToolCallResult(
             tool_call_id=tool_call_id,
             tool_name="edit",
             params=params,
             content=[{
                 "type": "text",
-                "text": f"Edited {path}: {changes} change(s), +{added}/-{removed} lines\n\n{diff_text}",
+                "text": result_text,
             }],
             details={
                 "path": str(full_path),

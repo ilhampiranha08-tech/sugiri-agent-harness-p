@@ -10,9 +10,10 @@ Sugiri comes with a **`/remember`** feature — when enabled, it automatically s
 
 Every API call has a cost — Sugiri tells you exactly how much. With **`/cost`** and a live cost counter in the status bar, you always know what you're spending down to the cent. No surprises, no runaway bills. Use `/cost` anytime to see your token usage and total session spend.
 
-> 🐍 Pure Python · 📦 One-click install · 🤖 4 AI providers · 🧠 Thinking mode · 💰 Cost tracking · 🔌 Extensible · 📜 MIT
+> 🐍 Pure Python · 📦 One-click install · 🤖 4 AI providers · 🧠 Thinking mode · 💰 Cost tracking · 🔌 Extensible · 📜 MIT  
+> **v1.2.3** — Fix: spinner flicker + input redundancy
 
-[![Version](https://img.shields.io/badge/version-1.2.2-blue)]()
+[![Version](https://img.shields.io/badge/version-1.2.3-blue)]()
 [![Python](https://img.shields.io/badge/python-3.10+-green)]()
 [![License](https://img.shields.io/badge/license-MIT-yellow)](LICENSE)
 

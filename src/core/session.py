@@ -253,7 +253,7 @@ class AgentSession:
             if models:
                 final_model = models[0]
 
-        return cls(
+        session = cls(
             agent=agent,
             session_manager=sess_mgr,
             settings_manager=sm,
@@ -264,6 +264,12 @@ class AgentSession:
             model=final_model,
             thinking_level=thinking_level,
         )
+        
+        # Restore persistent settings
+        if sm.get("memory_enabled", False):
+            session.remember_enabled = True
+        
+        return session
 
     @staticmethod
     def _build_system_prompt(
@@ -755,6 +761,11 @@ class AgentSession:
                 lines.append(f"")
         
         text = "\n".join(lines)
+        
+        # Warn if file already exists
+        if os.path.exists(path):
+            self._notify(f"⚠️  File already exists, overwriting: {os.path.abspath(path)}")
+        
         with open(path, "w", encoding="utf-8") as f:
             f.write(text)
         
@@ -789,7 +800,7 @@ Select provider:
             return
 
         self._notify(f"\nEnter API key for {provider}:")
-        self._notify("(input akan disembunyikan)\n")
+        self._notify("(input will be hidden)\n")
 
         try:
             api_key = await self._read_secret("API key: ")
@@ -980,6 +991,8 @@ Select provider:
         elif command == "remember":
             self.remember_enabled = not self.remember_enabled
             status = "on" if self.remember_enabled else "off"
+            # Persist the setting so it survives restarts
+            self._settings_manager.set("memory_enabled", self.remember_enabled)
             self._notify(f"Session memory: {status}")
         
         elif command == "clear":

@@ -82,7 +82,7 @@ class ProviderRegistry:
         """Get or create a shared HTTP client for connection pooling."""
         if self._shared_http_client is None:
             self._shared_http_client = httpx.AsyncClient(
-                timeout=httpx.Timeout(120.0),
+                timeout=httpx.Timeout(300.0),  # 5 min for long-thinking models
                 limits=httpx.Limits(max_connections=50, max_keepalive_connections=20),
             )
         return self._shared_http_client

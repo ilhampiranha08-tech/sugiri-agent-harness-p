@@ -34,10 +34,6 @@ DEEPSEEK_V4_EFFORT = {
     ThinkingLevel.XHIGH: "max",
 }
 
-# DeepSeek V4 supports: off, high, max
-DEEPSEEK_V4_LEVELS = ["off", "high", "max"]
-
-
 class DeepSeekProvider(ProviderInterface):
     """DeepSeek API provider (OpenAI-compatible)."""
 
@@ -50,7 +46,7 @@ class DeepSeekProvider(ProviderInterface):
 
     async def _get_client(self) -> httpx.AsyncClient:
         if self._client is None:
-            self._client = httpx.AsyncClient(timeout=httpx.Timeout(120.0))
+            self._client = httpx.AsyncClient(timeout=httpx.Timeout(300.0))  # 5 min for long-thinking models
             self._owns_client = True
         return self._client
 

@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Sugiri — "The AI agent that remembers"
-Built in Indonesia, works everywhere. v1.2.2
+Built in Indonesia, works everywhere. v1.2.3
+Fix: spinner race, token tracking, cursor wrap, session reset,
+Google tool result, remember persist, export overwrite warn,
+token count fallback, settings lock, edit warnings, timeout
 Standalone Installer — Double-click or: python install.py"""
 import base64,os,sys,subprocess,tarfile,io,shutil
 

@@ -104,15 +104,18 @@ class SettingsManager:
         self._save()
     
     def _save(self) -> None:
-        """Persist settings to global file."""
+        """Persist settings to global file (atomic write to prevent corruption)."""
         if not self._global_file:
             return
         
         self.agent_dir.mkdir(parents=True, exist_ok=True)
         
+        # Atomic write: tmp → rename (crash-safe, prevents concurrent corruption)
+        tmp_path = str(self._global_file) + ".tmp"
         try:
-            with open(self._global_file, "w") as f:
+            with open(tmp_path, "w") as f:
                 json.dump(self._settings, f, indent=2)
+            os.replace(tmp_path, str(self._global_file))
         except Exception:
             pass
     

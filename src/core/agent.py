@@ -129,8 +129,9 @@ class Agent:
         if _HAS_TIKTOKEN and _TIKTOKEN_ENC is not None:
             self._last_token_count = len(_TIKTOKEN_ENC.encode(text))
         else:
-            # Fallback: ~4 chars per token (reasonable for English)
-            self._last_token_count = len(text) // 4
+            # Fallback: ~2.5 chars per token (conservative for code + mixed languages)
+            # Pure English is ~4 chars/token, but code/CJK emoji can be 1-2 chars/token.
+            self._last_token_count = int(len(text) / 2.5)
         
         self._token_count_dirty = False
         return self._last_token_count
@@ -184,9 +185,10 @@ class Agent:
     
     def _track_usage(self, model: Model, usage: dict) -> None:
         """Track token usage and cost from a provider response."""
-        input_tokens = usage.get("input_tokens", 0) or usage.get("prompt_tokens", 0)
-        output_tokens = usage.get("output_tokens", 0) or usage.get("completion_tokens", 0)
-        cache_read = usage.get("cache_read_input_tokens", 0) or usage.get("cached_tokens", 0)
+        # Use `or` with None check first — 0 is a valid token count (not falsy fallback)
+        input_tokens = usage.get("input_tokens") or usage.get("prompt_tokens") or 0
+        output_tokens = usage.get("output_tokens") or usage.get("completion_tokens") or 0
+        cache_read = usage.get("cache_read_input_tokens") or usage.get("cached_tokens") or 0
         
         self._session_input_tokens += input_tokens
         self._session_output_tokens += output_tokens
@@ -700,10 +702,18 @@ class Agent:
             yield {"type": "agent_end", "messages": new_messages}
     
     def reset(self) -> None:
-        """Reset agent state (clear history)."""
+        """Reset agent state (clear history, cost, permissions)."""
         self.state = AgentState()
         self._steering_queue.clear()
         self._follow_up_queue.clear()
         self._abort_flag = False
         self._abort_event.clear()
         self._token_count_dirty = True
+        # Reset cost tracking for new session
+        self._total_cost = 0.0
+        self._session_input_tokens = 0
+        self._session_output_tokens = 0
+        self._session_cache_read_tokens = 0
+        # Reset permission state for new session
+        self._permission_allow_all = False
+        self.permission_gate_enabled = False

@@ -46,7 +46,7 @@ class OpenAIProvider(ProviderInterface):
 
     async def _get_client(self) -> httpx.AsyncClient:
         if self._client is None:
-            self._client = httpx.AsyncClient(timeout=httpx.Timeout(120.0))
+            self._client = httpx.AsyncClient(timeout=httpx.Timeout(300.0))  # 5 min for long-thinking models
             self._owns_client = True
         return self._client
 

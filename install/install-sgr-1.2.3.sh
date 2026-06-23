@@ -1,13 +1,17 @@
 #!/bin/bash
 # ==============================================
 #  Sugiri — "The AI agent that remembers"
-#  Built in Indonesia, works everywhere. v1.2.2
+#  Built in Indonesia, works everywhere. v1.2.3
+#  Fix: spinner race, token tracking, cursor wrap, session reset,
+#       Google tool result, remember persist, export overwrite warn,
+#       token count fallback, settings lock, edit warnings, timeout
 #  Standalone Installer
 # ==============================================
 set -e
 echo "========================================"
-echo "  Sugiri — The AI agent that remembers"
+echo "  Sugiri — The AI agent that remembers  v1.2.3"
 echo "  Built in Indonesia, works everywhere."
+echo "  Fix: spinner flicker + input redundancy"
 echo "========================================"
 echo ""
 detect_pkg() {

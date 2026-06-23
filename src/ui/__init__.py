@@ -134,20 +134,26 @@ class AgentTUI:
     
     def _start_loading(self, tool_name: str = ""):
         """Start the loading spinner. If tool_name given, shows elapsed time."""
-        if not self._loading:
-            self._loading = True
-            self._spinner_clear_on_exit = True
-            self._spinner_idx = 0
-            if tool_name:
-                self._spinner_task = asyncio.ensure_future(self._bash_progress_loop(tool_name))
-            else:
-                self._spinner_task = asyncio.ensure_future(self._spinner_loop())
+        # Cancel any previous spinner task to prevent race condition
+        # where two spinner tasks write to stdout simultaneously.
+        if self._spinner_task is not None and not self._spinner_task.done():
+            self._spinner_task.cancel()
+        self._loading = True
+        self._spinner_clear_on_exit = True
+        self._spinner_idx = 0
+        if tool_name:
+            self._spinner_task = asyncio.ensure_future(self._bash_progress_loop(tool_name))
+        else:
+            self._spinner_task = asyncio.ensure_future(self._spinner_loop())
     
     def _stop_loading(self):
         """Stop the loading spinner and clear its line immediately."""
         if self._loading:
             self._loading = False
             self._spinner_clear_on_exit = False  # Prevent async spinner from clearing again
+            # Cancel spinner task to ensure it stops immediately
+            if self._spinner_task is not None and not self._spinner_task.done():
+                self._spinner_task.cancel()
             # Clear spinner line synchronously — don't wait for async task
             import sys
             sys.stdout.write('\r\033[K')
@@ -490,21 +496,22 @@ class AgentTUI:
             if "text" in data:
                 self._stop_loading()
                 self._console.print(data["text"], end="")
+            elif "thinking" in data:
+                self._console.print(data["thinking"], end="")
         
         elif etype == EventType.MESSAGE_END:
-            self._stop_loading()
             msg = event.data.get("message")
             if msg:
                 self._print_message(msg)
         
         elif etype == EventType.TOOL_EXECUTION_START:
-            self._stop_loading()
             tool_name = event.data.get("tool_name", "unknown")
             self._console.print(f"\n[dim]🔧 Running [cyan]{tool_name}[/]...[/]")
-            self._start_loading(tool_name)  # Shows elapsed time for bash commands
+            # Keep spinner text consistent: always show "Thinking..."
+            # to avoid flickering between "Thinking" and tool name (e.g. "read")
+            self._start_loading()
         
         elif etype == EventType.TOOL_EXECUTION_END:
-            self._stop_loading()
             result = event.data.get("result")
             is_error = event.data.get("is_error", False)
             tool_name = event.data.get("tool_name", "")
@@ -527,10 +534,10 @@ class AgentTUI:
             self._start_loading()
         
         elif etype == EventType.TURN_START:
-            self._start_loading()
+            pass  # Spinner already running from AGENT_START, keep it continuous
         
         elif etype == EventType.TURN_END:
-            self._stop_loading()
+            pass  # Keep spinner running between turns for smooth UX
         
         elif etype == EventType.AGENT_END:
             self._stop_loading()
@@ -1052,18 +1059,50 @@ class AgentTUI:
     
     def _redraw_input_line(self, buffer: str, cursor: int, extra_lines: int):
         """Redraw the input line with proper cursor positioning.
-        Clears everything from the prompt line downward."""
+        Handles wrapped lines by moving cursor up to the start of the
+        prompt area before clearing, preventing duplicate text artifacts."""
         import sys
+        import shutil
         
         prompt = "> "
         display = prompt + buffer
         
-        # Clear current line and everything below it, then draw prompt
+        # Calculate how many screen lines the prompt area occupies.
+        # This is needed because \033[J only clears from cursor DOWNWARD;
+        # if the prompt wrapped, we must move up first to clear all lines.
+        term_width = shutil.get_terminal_size().columns or 80
+        # Number of screen lines the display text wraps to (minimum 1)
+        screen_lines = max(1, (len(display) + term_width - 1) // term_width)
+        total_lines = screen_lines + extra_lines
+        
+        # Move cursor up to the first line of the prompt area
+        if total_lines > 1:
+            sys.stdout.write(f'\033[{total_lines - 1}A')
+        
+        # Clear from the start of prompt area to end of screen, then draw
         sys.stdout.write('\r\033[J')
         sys.stdout.write(display)
         
+        # Position cursor within the buffer text.
+        # Handle wrapped lines: cursor may be on a different screen line
+        # than the end of the display text.
         if cursor < len(buffer):
-            sys.stdout.write(f'\033[{len(buffer) - cursor}D')
+            # Target character position in display string
+            target_char = len(prompt) + cursor
+            target_line = target_char // term_width
+            target_col = target_char % term_width
+            
+            # Current position is at end of display
+            end_char = len(display) - 1
+            current_line = end_char // term_width if end_char >= 0 else 0
+            
+            # Move up to target line, then to target column
+            lines_up = current_line - target_line
+            if lines_up > 0:
+                sys.stdout.write(f'\033[{lines_up}A')
+            sys.stdout.write('\r')
+            if target_col > 0:
+                sys.stdout.write(f'\033[{target_col}C')
         sys.stdout.flush()
     
     def _render_suggestions(self, buffer: str):

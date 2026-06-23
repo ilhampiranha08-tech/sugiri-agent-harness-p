@@ -343,6 +343,9 @@ class SessionManager:
         if not self._metadata.get("description") and message.role == "user":
             desc = message.content if isinstance(message.content, str) else ""
             self._metadata["description"] = desc[:80].strip() or "(empty)"
+            # Force full save to persist the new description immediately
+            if hasattr(self, '_append_count'):
+                self._append_count = 9  # Trigger full save on next append (every 10)
         
         entry = SessionEntry(
             id=message.id,
@@ -400,9 +403,9 @@ class SessionManager:
         self._append_count += 1
         
         # Write metadata + full file on first save; append-only thereafter
-        # Every 50 appends, do an atomic full save to refresh metadata header
+        # Every 10 appends, do an atomic full save to refresh metadata header
         if self._file_path.exists() and self._file_path.stat().st_size > 0:
-            if self._append_count % 50 == 0:
+            if self._append_count % 10 == 0:
                 self._save()  # Atomic full rewrite
             else:
                 # Append-only: write + fsync for crash-safety

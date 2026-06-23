@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="sugiri",
-    version="1.2.2",
+    version="1.2.3",
     description="Sugiri — AI Coding Agent, created by Ilham Sugiri",
     author="Ilham Sugiri",
     packages=find_packages(where="src"),

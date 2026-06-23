@@ -11,7 +11,7 @@ from __future__ import annotations
 import sys
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-# termios/tty hanya tersedia di Unix (Linux/macOS)
+# termios/tty only available on Unix (Linux/macOS)
 try:
     import termios
     import tty
