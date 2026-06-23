@@ -6,7 +6,7 @@ Sugiri is an AI coding agent created by Ilham Sugiri.
 
 > Update terakhir: 22 Juni 2026
 
-- Versi: v1.2.2
+- Versi: v1.2.4
 - 21 model LLM (Anthropic, OpenAI, Google, DeepSeek)
 - Baru: Permission gate (/permission), arrow suggestions (/ + ↑↓), export session (/export)
 - Bug fixed: kursor, spinner, escape sequence, provider auth error, session save O(n²)

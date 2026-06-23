@@ -11,9 +11,9 @@ Sugiri comes with a **`/remember`** feature — when enabled, it automatically s
 Every API call has a cost — Sugiri tells you exactly how much. With **`/cost`** and a live cost counter in the status bar, you always know what you're spending down to the cent. No surprises, no runaway bills. Use `/cost` anytime to see your token usage and total session spend.
 
 > 🐍 Pure Python · 📦 One-click install · 🤖 4 AI providers · 🧠 Thinking mode · 💰 Cost tracking · 🔌 Extensible · 📜 MIT  
-> **v1.2.3** — 17 bug fixes: spinner, input wrap, cost tracking, session reset, Google tool result, remember persist + more
+> **v1.2.4** — 17 bug fixes: spinner, input wrap, cost tracking, session reset, Google tool result, remember persist + more
 
-[![Version](https://img.shields.io/badge/version-1.2.3-blue)]()
+[![Version](https://img.shields.io/badge/version-1.2.4-blue)]()
 [![Python](https://img.shields.io/badge/python-3.10+-green)]()
 [![License](https://img.shields.io/badge/license-MIT-yellow)](LICENSE)
 
@@ -31,9 +31,9 @@ Every API call has a cost — Sugiri tells you exactly how much. With **`/cost`*
 
 | OS | Installer | Need |
 |----|-----------|------|
-| 🐧 Linux | [install-sgr-1.2.3.sh](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.3.sh) | Internet |
-| 🪟 Windows | [install-sgr-1.2.3.bat](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.3.bat) | Internet |
-| 🪟 Windows, 🐧 Linux & 🍎 macOS | [install-sgr-1.2.3.py](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.3.py) | Python + Internet |
+| 🐧 Linux | [install-sgr-1.2.4.sh](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.4.sh) | Internet |
+| 🪟 Windows | [install-sgr-1.2.4.bat](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.4.bat) | Internet |
+| 🪟 Windows, 🐧 Linux & 🍎 macOS | [install-sgr-1.2.4.py](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.4.py) | Python + Internet |
 
 ---
 
@@ -45,22 +45,22 @@ Just copy-paste one line into your terminal:
 
 **🐧 Linux:**
 ```bash
-curl -fsSL https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.3.sh | bash
+curl -fsSL https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.4.sh -o /tmp/sgr.sh && bash /tmp/sgr.sh
 ```
 
 **🪟 Windows (PowerShell):**
 ```powershell
-irm https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.3.bat -OutFile $env:TEMP\sgr.bat; & $env:TEMP\sgr.bat
+irm https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.4.bat -OutFile $env:TEMP\sgr.bat; & $env:TEMP\sgr.bat
 ```
 
 **🪟 Windows (CMD):**
 ```cmd
-curl -fsSL https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.3.bat -o %TEMP%\sgr.bat && %TEMP%\sgr.bat
+curl -fsSL https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.4.bat -o %TEMP%\sgr.bat && %TEMP%\sgr.bat
 ```
 
 **🐍 Cross-platform 🐧 Linux / 🍎 macOS / 🪟 Windows (need Python 3.10+):**
 ```bash
-curl -fsSL https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.3.py | python3
+curl -fsSL https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.4.py | python3
 ```
 
 The installer auto-detects your OS, installs Python if missing, and sets up Sugiri.
@@ -71,30 +71,30 @@ Then just open a terminal and type `sugiri`.
 *Download the installer for your OS from the [table above](#-download), then:*
 
 **🐧 Linux:**
-1. Download [install-sgr-1.2.3.sh](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.3.sh)
+1. Download [install-sgr-1.2.4.sh](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.4.sh)
 2. Open a terminal in your downloads folder:
    ```bash
    cd ~/Downloads
    ```
 3. Run the installer:
    ```bash
-   chmod +x install-sgr-1.2.3.sh
-   ./install-sgr-1.2.3.sh
+   chmod +x install-sgr-1.2.4.sh
+   ./install-sgr-1.2.4.sh
    ```
 
 **🪟 Windows:**
-1. Download [install-sgr-1.2.3.bat](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.3.bat)
+1. Download [install-sgr-1.2.4.bat](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.4.bat)
 2. Double-click the file
 
 **🐍 Cross-platform (Python):**
-1. Download [install-sgr-1.2.3.py](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.3.py)
+1. Download [install-sgr-1.2.4.py](https://github.com/ilhampiranha08-tech/sugiri-agent-harness-p/releases/download/ai_code_agent/install-sgr-1.2.4.py)
 2. Open a terminal in your downloads folder:
    ```bash
    cd ~/Downloads
    ```
 3. Run the installer:
    ```bash
-   python3 install-sgr-1.2.3.py
+   python3 install-sgr-1.2.4.py
    ```
 
 ### Option 3: Manual (pip)

@@ -365,7 +365,7 @@ class AgentTUI:
         
         self._console.print()
         self._console.print("[bold cyan]╔══════════════════════════════════════════════╗[/]")
-        self._console.print("[bold cyan]║[/]   [bold]Welcome to Sugiri v1.2.2![/]              [bold cyan]║[/]")
+        self._console.print("[bold cyan]║[/]   [bold]Welcome to Sugiri v1.2.4![/]              [bold cyan]║[/]")
         self._console.print("[bold cyan]║[/]   Let's set up your AI provider.         [bold cyan]║[/]")
         self._console.print("[bold cyan]╚══════════════════════════════════════════════╝[/]")
         self._console.print()

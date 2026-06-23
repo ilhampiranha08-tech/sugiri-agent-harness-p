@@ -330,7 +330,7 @@ def cli(
         return
 
     if version:
-        print("Sugiri v1.2.2")
+        print("Sugiri v1.2.4")
         return
 
     # Determine final mode

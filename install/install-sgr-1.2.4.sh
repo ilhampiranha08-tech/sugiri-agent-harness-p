@@ -1,17 +1,43 @@
 #!/bin/bash
 # ==============================================
 #  Sugiri — "The AI agent that remembers"
-#  Built in Indonesia, works everywhere. v1.2.3
+#  Built in Indonesia, works everywhere. v1.2.4
 #  Fix: spinner race, token tracking, cursor wrap, session reset,
 #       Google tool result, remember persist, export overwrite warn,
 #       token count fallback, settings lock, edit warnings, timeout
 #  Standalone Installer
 # ==============================================
 set -e
+# ── Safety: reject piped execution (curl ... | bash) ──
+# Self-extracting archive needs $0 to be a real file path
+if [ ! -f "$0" ] || [ ! -r "$0" ]; then
+    echo "ERROR: This installer cannot run via pipe (curl ... | bash)."
+    echo "Please use: curl -fsSL <url> -o /tmp/sgr.sh && bash /tmp/sgr.sh"
+    exit 1
+fi
+# Detect Alpine Linux (Acode editor on Android)
+IS_ALPINE=false
+if [ -f /etc/alpine-release ] 2>/dev/null; then
+    IS_ALPINE=true
+fi
+# Detect Termux (Android) early
+IS_TERMUX=false
+if [ -n "$PREFIX" ] && [ -d "$PREFIX" ] && [ -f "$PREFIX/bin/termux-info" ] 2>/dev/null; then
+    IS_TERMUX=true
+fi
+if [ -f /data/data/com.termux/files/usr/bin/termux-info ] 2>/dev/null; then
+    IS_TERMUX=true
+fi
 echo "========================================"
-echo "  Sugiri — The AI agent that remembers  v1.2.3"
+echo "  Sugiri — The AI agent that remembers  v1.2.4"
 echo "  Built in Indonesia, works everywhere."
 echo "  Fix: spinner flicker + input redundancy"
+if $IS_TERMUX; then
+    echo "  Detected: Termux (Android)"
+fi
+if $IS_ALPINE; then
+    echo "  Detected: Alpine Linux"
+fi
 echo "========================================"
 echo ""
 detect_pkg() {
@@ -30,32 +56,55 @@ if command -v sudo &>/dev/null; then
 fi
 
 PKG=$(detect_pkg)
-if ! command -v python3 &>/dev/null; then
-    echo "[...] Installing Python3..."
-    case "$PKG" in
-        apt)    $SUDO apt update && $SUDO apt install -y python3 python3-pip ;;
-        pacman) $SUDO pacman -S --noconfirm python python-pip ;;
-        dnf)    $SUDO dnf install -y python3 python3-pip ;;
-        yum)    $SUDO yum install -y python3 python3-pip ;;
-        apk)    $SUDO apk add python3 py3-pip ;;
-        zypper) $SUDO zypper install -y python3 python3-pip ;;
-        xbps)   $SUDO xbps-install -y python3 python3-pip ;;
-        *)      echo "Install Python3 manually: https://python.org"; exit 1 ;;
-    esac
+if $IS_TERMUX; then
+    # Termux (Android) — use "python" not "python3"
+    if ! command -v python &>/dev/null; then
+        echo "[...] Installing Python (Termux)..."
+        apt update && apt install -y python
+    fi
+    PYTHON_CMD="python"
+    PIP_CMD="pip"
+    # base64 may need coreutils
+    if ! command -v base64 &>/dev/null; then
+        echo "[...] Installing base64 (Termux)..."
+        apt install -y coreutils 2>/dev/null || true
+    fi
+else
+    if ! command -v python3 &>/dev/null; then
+        echo "[...] Installing Python3..."
+        case "$PKG" in
+            apt)    $SUDO apt update && $SUDO apt install -y python3 python3-pip ;;
+            pacman) $SUDO pacman -S --noconfirm python python-pip ;;
+            dnf)    $SUDO dnf install -y python3 python3-pip ;;
+            yum)    $SUDO yum install -y python3 python3-pip ;;
+            apk)    $SUDO apk add python3 py3-pip ;;
+            zypper) $SUDO zypper install -y python3 python3-pip ;;
+            xbps)   $SUDO xbps-install -y python3 python3-pip ;;
+            *)      echo "Install Python3 manually: https://python.org"; exit 1 ;;
+        esac
+    fi
+    PYTHON_CMD="python3"
+    PIP_CMD="pip3"
 fi
-echo "[OK] Python3: $(python3 --version)"
-if ! command -v pip3 &>/dev/null; then python3 -m ensurepip --upgrade 2>/dev/null || true; fi
+echo "[OK] Python: $($PYTHON_CMD --version)"
+if ! command -v $PIP_CMD &>/dev/null; then $PYTHON_CMD -m ensurepip --upgrade 2>/dev/null || true; fi
 echo "[...] Installing dependencies..."
-pip3 install --user httpx rich click 2>/dev/null || pip3 install --break-system-packages httpx rich click 2>/dev/null || true
+$PIP_CMD install --user httpx rich click 2>/dev/null || $PIP_CMD install --break-system-packages httpx rich click 2>/dev/null || true
 INSTALL_DIR="$HOME/.sugiri"
 echo "[...] Extracting Sugiri to $INSTALL_DIR..."
 rm -rf "$INSTALL_DIR"
 mkdir -p "$INSTALL_DIR"
-ARCHIVE_START=$(awk '/^__ARCHIVE__$/ {print NR+1; exit}' "$0")
+# Find archive start: use awk if available, else grep + cut
+if command -v awk &>/dev/null; then
+    ARCHIVE_START=$(awk '/^__ARCHIVE__$/ {print NR+1; exit}' "$0")
+else
+    ARCHIVE_START=$(grep -n '^__ARCHIVE__$' "$0" | head -1 | cut -d: -f1)
+    ARCHIVE_START=$((ARCHIVE_START + 1))
+fi
 tail -n +$ARCHIVE_START "$0" | base64 -d | tar xz -C "$INSTALL_DIR"
 echo "[...] Installing Sugiri..."
 cd "$INSTALL_DIR"
-pip3 install --user -e . 2>/dev/null || pip3 install --break-system-packages -e . 2>/dev/null || true
+$PIP_CMD install --user -e . 2>/dev/null || $PIP_CMD install --break-system-packages -e . 2>/dev/null || true
 echo ""
 echo "========================================"
 echo "  INSTALL COMPLETE!"

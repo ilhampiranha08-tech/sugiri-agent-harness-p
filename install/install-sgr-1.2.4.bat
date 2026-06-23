@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 REM ==============================================
 REM  Sugiri - "The AI agent that remembers"
-REM  Built in Indonesia, works everywhere. v1.2.3
+REM  Built in Indonesia, works everywhere. v1.2.4
 REM  Windows Standalone Installer - Double-click
 REM  Fix: spinner race, token tracking, cursor wrap, session reset,
 REM       Google tool result, remember persist, export overwrite warn,
@@ -10,7 +10,7 @@ REM       token count fallback, settings lock, edit warnings, timeout
 REM ==============================================
 
 echo ========================================
-echo   Sugiri - "The AI agent that remembers"  v1.2.3
+echo   Sugiri - "The AI agent that remembers"  v1.2.4
 echo   Built in Indonesia, works everywhere.
 echo   Fix: spinner flicker + input redundancy
 echo ========================================
@@ -278,7 +278,7 @@ echo ========================================
 echo   INSTALL COMPLETE!
 echo ========================================
 echo.
-echo   Sugiri v1.2.3 is ready!
+echo   Sugiri v1.2.4 is ready!
 echo.
 echo   HOW TO RUN:
 echo.
